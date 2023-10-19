@@ -1,6 +1,7 @@
 import { PersonnageAction } from "../enum/PersonnageAction";
 import { PersonnageSide } from "../enum/PersonnageSide";
 import { PersonnageType } from "../enum/PersonnageType";
+import { Grid } from "./Grid";
 
 export abstract class Personnage{
 
@@ -10,10 +11,15 @@ export abstract class Personnage{
     protected nbMana: number;
     protected type: PersonnageType;
     protected number: number=0;
-    protected coordonees:[number, number];
+    protected coordonnees:[number, number];
+    protected coordonneesPossible:[number, number][]=[];
     protected actions:PersonnageAction[];
+    private img: string;
     protected side: PersonnageSide=PersonnageSide.neutre;
-    protected active:boolean=true;
+    protected active:boolean=false;
+    protected grid:Grid;
+    public x: number;
+    public y: number;
 
     public constructor(
         nbVie: number,
@@ -21,9 +27,11 @@ export abstract class Personnage{
         nbAction: number,
         nbMana: number,
         type:PersonnageType,
-        coordonees:[number, number],
+        coordonnees:[number, number],
         actions:PersonnageAction[],
+        img:string,
         side:PersonnageSide,
+        grid: Grid
         )
     public constructor(
         nbVie: number,
@@ -31,9 +39,11 @@ export abstract class Personnage{
         nbAction: number,
         nbMana: number,
         type:PersonnageType,
-        coordonees:[number, number],
+        coordonnees:[number, number],
         actions:PersonnageAction[],
+        img:string,
         side:PersonnageSide,
+        grid: Grid,
         number?: number,
         ){
             this.nbVie = nbVie;
@@ -41,10 +51,19 @@ export abstract class Personnage{
             this.nbAction = nbAction;
             this.nbMana = nbMana;
             this.type = type;
-            this.coordonees = coordonees;
+            this.coordonnees = coordonnees;
             this.actions = actions;
+            this.img = img;
             this.side = side;
+            this.grid = grid;
+            this.x = this.getGrid().getHeight();
+            this.y = this.getGrid().getWidth();
+            
+            this.coordonneesPossible = this.defineCoordonneesPossible(coordonnees)
+
             if (number) this.number = number;
+            grid.displayPersonnageOnCase(this, this.coordonnees, img);
+            this.grid.addPersonnageList(this);
     }
 
 
@@ -83,11 +102,25 @@ export abstract class Personnage{
         this.type = value;
     }
 
+    protected getImg(): string {
+        return this.img;
+    }
+    protected setImg(value: string) {
+        this.img = value;
+    }
+
     public getSide(): PersonnageSide {
         return this.side;
     }
     public setSide(value: PersonnageSide):void {
         this.side = value;
+    }
+
+    public getGrid(): Grid {
+        return this.grid;
+    }
+    public setGrid(value: Grid):void {
+        this.grid = value;
     }
 
     public getNumber(): number {
@@ -97,11 +130,19 @@ export abstract class Personnage{
         this.number = value;
     }
 
-    public getCoordonnes(): [number,number] {
-        return this.coordonees;
+    public getCoordonnees(): [number,number] {
+        return this.coordonnees;
     }
-    public setCoordonees(value: [number,number]):void {
-        this.coordonees = value;
+    public setCoordonnees(value: [number,number]):void {
+        this.coordonnees = value;
+    }
+
+    public getCoordonneesPossible(): [number,number][]{
+        return this.coordonneesPossible
+    }
+
+    public setCoordonneesPossible(value: [number,number][]):void {
+        this.coordonneesPossible = value;
     }
 
     public getAction(): PersonnageAction[]{
@@ -126,18 +167,75 @@ export abstract class Personnage{
         this.setActive(false);
         return "Je vais me reposer"
     }
-    public move(): void {
-        this.setNbAction(this.nbAction-1);
-        if (this.getNbAction()===0) {
-            this.setActive(false);
-        }
-        //TODO: implémenter
-    }
 
     public useAction(){
         this.setNbAction(this.getNbAction()-1);
         if (this.getNbAction()===0){
             this.setActive(false);
         }
+    }
+    private defineCoordonneesPossible(coordonnees:[number, number]):[number, number][] {
+
+        //ATTENTION CODE SMELL :
+        if(this.coordonnees[0]===1){
+            if(this.coordonnees[1]===1){
+                return [[1,2],[2,1]]
+            }else if(this.coordonnees[1]===this.y){
+                return[[1,this.y-1],[2,this.y]]
+            }else{
+                return[[1,coordonnees[1]-1],[1,coordonnees[1]+1], [2,coordonnees[1]]];
+            }
+        }
+        else if(this.coordonnees[1]===1){
+            if(this.coordonnees[0]===1){
+                return[[1,2],[2,1]];
+            }else if(this.coordonnees[0]===this.x){
+                return[[this.x-1,1],[this.x,2]];
+            }else{
+                return[[coordonnees[0]-1, 1],[coordonnees[0]+1, 1], [coordonnees[0], 2]];
+            }
+        }
+        else if(this.coordonnees[0]===this.x){
+            if(this.coordonnees[1]===this.y){
+                return[[this.x-1,this.y],[this.x,this.y-1]];
+            }else{
+                return[[this.x,this.y-1], [this.x, this.y+1], [this.x-1, this.y]];
+            }
+        }
+        else if(this.coordonnees[1]===this.y){
+            if(this.coordonnees[0]===this.x){
+                return[[this.x-1,this.y],[this.x,this.y-1]];
+            }else{
+                return[[this.x-1,this.y], [this.x+1, this.y], [this.x-1, this.y]];
+            }
+        }else{
+            return[
+                [this.coordonnees[0]-1, this.coordonnees[1]],
+                [this.coordonnees[0]+1, this.coordonnees[1]],
+                [this.coordonnees[0], this.coordonnees[1]-1],
+                [this.coordonnees[0], this.coordonnees[1]+1]
+            ];
+        }
+    }
+
+    public move(newCoordinates: [number, number]): void {
+        if (this.nbAction > 0 && this.active) {
+            const possibleCoordinates = this.getCoordonneesPossible();
+            if (this.isCoordinateInArray(newCoordinates, possibleCoordinates)) {
+                this.grid.removePersonnageFromCase(this.coordonnees);
+                this.setCoordonnees(newCoordinates);
+                this.grid.displayPersonnageOnCase(this, this.coordonnees, this.img);
+                this.useAction();
+            }
+        }
+    }
+    
+    private isCoordinateInArray(target: [number, number], coordinatesArray: [number, number][]): boolean {
+        for (const coordinates of coordinatesArray) {
+            if (coordinates[0] === target[0] && coordinates[1] === target[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 }
