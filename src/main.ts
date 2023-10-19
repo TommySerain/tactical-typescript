@@ -1,4 +1,4 @@
-import './style.css'
+import './style.css';
 import { Grid } from './class/Grid.ts';
 import { Villagers } from './class/Villagers.ts';
 import { PersonnageSide } from './enum/PersonnageSide.ts';
@@ -21,10 +21,49 @@ let recruteur = new Recruiter(PersonnageSide.side1, grid, [1, 1]);
 let warrior = new Warrior(PersonnageSide.side2, grid, [2, 3]);
 
 let allUnits = grid.getPersonnageList();
-console.log("1 : ",allUnits);
-let perso1Units = allUnits.filter((personnage) => personnage.getSide() === "1");
-let perso2Units = allUnits.filter((personnage) => personnage.getSide() === "2");
-console.log("1 : ",perso1Units);
+console.log("Tous les personnages : ", allUnits);
+
+let isSelectingCharacter = false;
+
+document.addEventListener('click', (e) => {
+    const [x, y] = getCoordinatesFromEvent(e);
+    console.log("Clic à la position", x, y);
+
+    if (isSelectingCharacter) {
+        // Clic pour sélectionner la case d'arrivée
+        game.setSelectedCoordinates([x, y]);
+        isSelectingCharacter = false;
+
+        const selectedCharacter = game.getSelectedCharacter();
+        if (selectedCharacter) {
+            const selectedCoordinates = game.getSelectedCoordinates();
+            selectedCharacter.move(selectedCoordinates!);
+            game.setSelectedCharacter(null);
+            game.setSelectedCoordinates(null);
+        }
+    } else {
+        // Clic pour sélectionner un personnage
+        const selectedCharacter = allUnits.find(personnage => {
+            const [i, j] = personnage.getCoordonnees();
+            return i === x && j === y;
+        });
+        if (selectedCharacter) {
+            console.log("Personnage sélectionné :", selectedCharacter);
+            game.setSelectedCharacter(selectedCharacter);
+            isSelectingCharacter = true;
+        }
+    }
+});
+
+function getCoordinatesFromEvent(event: MouseEvent): [number, number] {
+    const target = event.target as HTMLDivElement;
+    const coordinates = target.getAttribute('data-coordinates');
+    if (coordinates) {
+        return JSON.parse(coordinates);
+    } else {
+        return [0, 0];
+    }
+}
 
 
 

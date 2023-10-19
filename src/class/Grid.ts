@@ -95,32 +95,42 @@ export class Grid{
     public displayPersonnageOnCase(personnage: Personnage, coordinates: [number, number], img: string) {
         const [x, y] = coordinates;
         const caseElement = document.getElementById(`case_${x}_${y}`);
-
-
+    
         const [i, j] = coordinates;
-
         const div = document.createElement('div');
         div.classList.add('grid-cell');
         const id: string = `case_${i}_${j}`;
         div.setAttribute('id', id);
         const coordonnees: string = JSON.stringify([i, j]);
         div.setAttribute('data-coordinates', coordonnees);
-
+    
         if (caseElement) {
             const perso = document.createElement('img');
             perso.classList.add(personnage.getType());
             perso.setAttribute('src', img);
-            perso.style.height = this.caseSize;
+            perso.style.height = "20px";
             perso.addEventListener('click', () => {
-                // console.log(personnage);
-                // console.log(personnage.getCoordonnees());
-                // console.log(personnage.getAction());
-                // console.log(personnage.getNumber());
-                // console.log(personnage.getSide());
-                // console.log(personnage.getGrid().getHeight());
-                // console.log(personnage.getGrid().getWidth());
-                console.log(personnage.getCoordonneesPossible());
-            })
+                // Vérifiez si un personnage est déjà sélectionné
+                const game = personnage.getGrid().getGame();
+                const selectedCharacter = game.getSelectedCharacter();
+                // console.log("perso select : ",selectedCharacter);
+                if (selectedCharacter) {
+                    // Personnage déjà sélectionné, vérifiez si la case d'arrivée est également sélectionnée
+                    const selectedCoordinates = game.getSelectedCoordinates();
+                    // console.log("selected coord : ",selectedCoordinates);
+                    if (selectedCoordinates) {
+                        // Déplacez le personnage vers la case sélectionnée
+                        const [newX, newY] = coordinates;
+                        selectedCharacter.move([newX, newY]);
+                        // Réinitialisez les sélections
+                        game.setSelectedCharacter(null);
+                        game.setSelectedCoordinates(null);
+                    }
+                } else {
+                    // Sélectionnez ce personnage comme personnage actuellement sélectionné
+                    game.setSelectedCharacter(personnage);
+                }
+            });
             caseElement.appendChild(perso);
         }
         this.occupiedCases.set(`case_${x}_${y}`, personnage);
@@ -148,12 +158,20 @@ export class Grid{
                 const div = document.getElementById(`case_${i}_${j}`);
                 const caseId = `case_${i}_${j}`;
                 const personnage = this.occupiedCases.get(caseId);
-
-                if (div && personnage) {
-                    div.style.backgroundColor = this.getColorForPersonnage(personnage);
+    
+                if (div) {
+                    if (personnage) {
+                        div.style.backgroundColor = this.getColorForPersonnage(personnage);
+                    } else {
+                        div.style.backgroundColor = this.getColorForEmptyCase(); // Gérez les cases vides ici
+                    }
                 }
             }
         }
+    }
+
+    private getColorForEmptyCase(): string {
+        return 'transparent'; // Couleur de fond pour les cases vides
     }
 
     public getColorForPersonnage(personnage: Personnage): string {

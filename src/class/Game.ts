@@ -2,6 +2,8 @@
 import { Personnage } from "./Personnage";
 
 export class Game{
+    private selectedCharacter: Personnage | null = null;
+    private selectedCoordinates: [number, number] | null = null;
 
     constructor(
         private neutralUnits:Personnage[] = [],
@@ -24,6 +26,22 @@ export class Game{
     }
     public setPlayer2Units(value: Personnage[]) {
         this.player2Units = value;
+    }
+
+    public setSelectedCharacter(character: Personnage | null) {
+        this.selectedCharacter = character;
+    }
+
+    public getSelectedCharacter(): Personnage | null {
+        return this.selectedCharacter;
+    }
+
+    public setSelectedCoordinates(coordinates: [number, number] | null) {
+        this.selectedCoordinates = coordinates;
+    }
+
+    public getSelectedCoordinates(): [number, number] | null {
+        return this.selectedCoordinates;
     }
 
 }

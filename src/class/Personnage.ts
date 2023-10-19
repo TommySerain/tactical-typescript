@@ -174,65 +174,44 @@ export abstract class Personnage{
             this.setActive(false);
         }
     }
-    private defineCoordonneesPossible(coordonnees:[number, number]):[number, number][] {
-
-        //ATTENTION CODE SMELL :
-        if(this.coordonnees[0]===1){
-            if(this.coordonnees[1]===1){
-                return [[1,2],[2,1]]
-            }else if(this.coordonnees[1]===this.y){
-                return[[1,this.y-1],[2,this.y]]
-            }else{
-                return[[1,coordonnees[1]-1],[1,coordonnees[1]+1], [2,coordonnees[1]]];
-            }
-        }
-        else if(this.coordonnees[1]===1){
-            if(this.coordonnees[0]===1){
-                return[[1,2],[2,1]];
-            }else if(this.coordonnees[0]===this.x){
-                return[[this.x-1,1],[this.x,2]];
-            }else{
-                return[[coordonnees[0]-1, 1],[coordonnees[0]+1, 1], [coordonnees[0], 2]];
-            }
-        }
-        else if(this.coordonnees[0]===this.x){
-            if(this.coordonnees[1]===this.y){
-                return[[this.x-1,this.y],[this.x,this.y-1]];
-            }else{
-                return[[this.x,this.y-1], [this.x, this.y+1], [this.x-1, this.y]];
-            }
-        }
-        else if(this.coordonnees[1]===this.y){
-            if(this.coordonnees[0]===this.x){
-                return[[this.x-1,this.y],[this.x,this.y-1]];
-            }else{
-                return[[this.x-1,this.y], [this.x+1, this.y], [this.x-1, this.y]];
-            }
-        }else{
-            return[
-                [this.coordonnees[0]-1, this.coordonnees[1]],
-                [this.coordonnees[0]+1, this.coordonnees[1]],
-                [this.coordonnees[0], this.coordonnees[1]-1],
-                [this.coordonnees[0], this.coordonnees[1]+1]
-            ];
-        }
+    private defineCoordonneesPossible(coordonnees: [number, number]): [number, number][] {
+        const x = coordonnees[0];
+        const y = coordonnees[1];
+        const possibleCoordonnes: [number, number][] = [];
+    
+        if (x > 1) possibleCoordonnes.push([x - 1, y]);
+        if (x < this.x) possibleCoordonnes.push([x + 1, y]);
+        if (y > 1) possibleCoordonnes.push([x, y - 1]);
+        if (y < this.y) possibleCoordonnes.push([x, y + 1]);
+    
+        return possibleCoordonnes;
     }
 
-    public move(newCoordinates: [number, number]): void {
-        if (this.nbAction > 0 && this.active) {
-            const possibleCoordinates = this.getCoordonneesPossible();
-            if (this.isCoordinateInArray(newCoordinates, possibleCoordinates)) {
-                this.grid.removePersonnageFromCase(this.coordonnees);
-                this.setCoordonnees(newCoordinates);
+    public move(newCoordonnees: [number, number]): void {
+        console.log("Déplacement en cours...", this.coordonnees, "vers", newCoordonnees);
+        console.log("Coordonnées possibles : ", this.getCoordonneesPossible());
+        console.log("Nouvelles coordonnées : ", newCoordonnees);
+    
+        const possibleCoordonnes = this.getCoordonneesPossible();
+        
+        if (this.isCoordonneesInArray(newCoordonnees, possibleCoordonnes)) {
+            const oldCoordonnes = this.getCoordonnees(); // Enregistrer les anciennes coordonnées
+            this.grid.removePersonnageFromCase(oldCoordonnes);
+    
+            // Utiliser requestAnimationFrame pour forcer la mise à jour de l'interface utilisateur
+                requestAnimationFrame(() => {
+                this.setCoordonnees(newCoordonnees);
+                this.setCoordonneesPossible(this.defineCoordonneesPossible(this.getCoordonnees()));
                 this.grid.displayPersonnageOnCase(this, this.coordonnees, this.img);
                 this.useAction();
-            }
+                this.grid.updateGridBackgroundColors(); // Mettre à jour la couleur de fond après le déplacement
+            });
         }
     }
     
-    private isCoordinateInArray(target: [number, number], coordinatesArray: [number, number][]): boolean {
-        for (const coordinates of coordinatesArray) {
-            if (coordinates[0] === target[0] && coordinates[1] === target[1]) {
+    private isCoordonneesInArray(target: [number, number], coordonnesArray: [number, number][]): boolean {
+        for (const coordonnees of coordonnesArray) {
+            if (coordonnees[0] === target[0] && coordonnees[1] === target[1]) {
                 return true;
             }
         }
