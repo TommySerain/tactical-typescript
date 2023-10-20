@@ -105,10 +105,10 @@ export abstract class Personnage{
         this.type = value;
     }
 
-    protected getImg(): string {
+    public getImg(): string {
         return this.img;
     }
-    protected setImg(value: string) {
+    public setImg(value: string) {
         this.img = value;
     }
 

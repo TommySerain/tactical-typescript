@@ -43,13 +43,15 @@ export class Recruiter extends Personnage{
         cible.getGrid().removePersonnageFromCase(cible.getCoordonnees());
     
         let nouveauPersonnage: Personnage;
-        nouveauPersonnage = new Warrior(this.getSide(), cible.getGrid(), cible.getCoordonnees());
+        nouveauPersonnage = new Warrior(cible.getSide(), cible.getGrid(), cible.getCoordonnees());
+
         nouveauPersonnage.setNbVie(cible.getNbVie());
         nouveauPersonnage.setNumber(cible.getNumber());
-        nouveauPersonnage.setCoordonnees(cible.getCoordonnees());
-        cible.getGrid().removePersonnageList(cible);
-        cible.getGrid().addPersonnageList(nouveauPersonnage);
-        cible.getGrid().displayPersonnageOnCase(nouveauPersonnage, cible.getCoordonnees(), this.getImg());
+
+        this.grid.removePersonnageFromCase(cible.getCoordonnees());
+        this.grid.removePersonnageList(cible);
+        this.getGrid().addPersonnageList(nouveauPersonnage);
+        this.getGrid().displayPersonnageOnCase(nouveauPersonnage, cible.getCoordonnees(), nouveauPersonnage.getImg());
         return nouveauPersonnage;
     }
 }
