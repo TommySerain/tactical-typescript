@@ -68,6 +68,13 @@ export class Grid{
         this.game = value;
     }
 
+    public getOccupiedCases(): Map<string, Personnage> {
+        return this.occupiedCases;
+    }
+    public setOccupiedCases(value: Map<string, Personnage>) {
+        this.occupiedCases = value;
+    }
+
     public displayGrid(){
         if(this.gridContainer!==null){
             for (let i = 1; i <= this.height; i++) {
@@ -188,6 +195,24 @@ export class Grid{
             default:
                 return 'transparent';
         }
+    }
+
+    public isCaseOccupied(coordinates: [number, number]): boolean {
+        const caseId = `case_${coordinates[0]}_${coordinates[1]}`;
+        return this.occupiedCases.has(caseId);
+    }
+
+    public getOccupantAtCoordinates(coordinates: [number, number]): Personnage | null {
+        for (const personnage of this.personnageList) {
+            const personnageCoordonnees = personnage.getCoordonnees();
+            if (
+                personnageCoordonnees[0] === coordinates[0] &&
+                personnageCoordonnees[1] === coordinates[1]
+            ) {
+                return personnage;
+            }
+        }
+        return null; // Aucun personnage n'occupe la case
     }
 
 }

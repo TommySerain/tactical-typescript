@@ -1,24 +1,24 @@
 import './style.css';
+import { Game } from './class/Game.ts';
 import { Grid } from './class/Grid.ts';
+import { Personnage } from './class/Personnage.ts';
 import { Villagers } from './class/Villagers.ts';
 import { PersonnageSide } from './enum/PersonnageSide.ts';
 import { Recruiter } from './class/Recruiter.ts';
 import { PersonnageType } from './enum/PersonnageType.ts';
 import { Healer } from './class/Healer.ts';
 import { Warrior } from './class/Warrior.ts';
-import { Game } from './class/Game.ts';
-import { Personnage } from './class/Personnage.ts';
 
 const game = new Game();
 
 const grid = new Grid(6, 6, game);
 grid.displayGrid();
 
+let warrior = new Warrior(PersonnageSide.side2, grid, [2, 3]);
 let perso1 = new Villagers(PersonnageSide.neutre, grid, [1, 6]);
 let perso2 = new Villagers(PersonnageSide.side1, grid, [6, 6]);
-let healer = new Healer(PersonnageSide.side2, grid, [6, 1]);
+let healer = new Healer(PersonnageSide.side1, grid, [6, 1]);
 let recruteur = new Recruiter(PersonnageSide.side1, grid, [1, 1]);
-let warrior = new Warrior(PersonnageSide.side2, grid, [2, 3]);
 
 let allUnits = grid.getPersonnageList();
 console.log("Tous les personnages : ", allUnits);
@@ -30,7 +30,6 @@ document.addEventListener('click', (e) => {
     console.log("Clic à la position", x, y);
 
     if (isSelectingCharacter) {
-        // Clic pour sélectionner la case d'arrivée
         game.setSelectedCoordinates([x, y]);
         isSelectingCharacter = false;
 
@@ -42,7 +41,6 @@ document.addEventListener('click', (e) => {
             game.setSelectedCoordinates(null);
         }
     } else {
-        // Clic pour sélectionner un personnage
         const selectedCharacter = allUnits.find(personnage => {
             const [i, j] = personnage.getCoordonnees();
             return i === x && j === y;
@@ -96,7 +94,7 @@ perso1Units = allUnits.filter((personnage) => personnage.getSide() === "1");
 console.log("2 : ",perso1Units);
 
 console.log('perso1, 2: ', perso1);
-perso1 = recruteur.train(perso1, PersonnageType.warrior);
+perso2 = recruteur.train(perso2, PersonnageType.warrior);
 allUnits = grid.getPersonnageList();
 console.log("3 : ",allUnits)
 perso1Units = allUnits.filter((personnage) => personnage.getSide() === "1");

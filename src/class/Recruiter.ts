@@ -24,63 +24,42 @@ export class Recruiter extends Personnage{
         );
     }
 
-    public recruite(cible: Personnage):Personnage{
-        if(cible.getSide()!=PersonnageSide.neutre){
+    public recruite(cible: Personnage) {
+        if (cible.getSide() != PersonnageSide.neutre) {
             this.useAction();
-            alert("Ce personnage a déjà un camp et il ne changera pas.")
-            return cible
+            alert("Ce personnage a déjà un camp et ne changera pas.");
         }
-        cible.getGrid().removePersonnageFromCase(cible.getCoordonnees());
-        this.grid.removePersonnageList(cible);
-        let villageois = new Villagers(this.getSide(), cible.getGrid(), cible.getCoordonnees());
-        villageois.setNumber(cible.getNumber());
-        villageois.setCoordonnees(cible.getCoordonnees());
-        cible = villageois;
+        cible.setSide(this.getSide());
+        cible.getGrid().updateGridBackgroundColors();
         this.useAction();
-        // alert("Ce personnage est maintenant de votre côté.")
-        return cible
+    
     }
-
-    public train(cible: Personnage, type: PersonnageType):Personnage{
-        if(cible.getType()!==PersonnageType.villager){
-            this.useAction();
-            return cible
+    
+    public train(cible: Personnage, type: PersonnageType): Personnage{
+        if (cible.getType() !== PersonnageType.villager) {
+            return cible;
         }
+    
         cible.getGrid().removePersonnageFromCase(cible.getCoordonnees());
-        this.grid.removePersonnageList(cible);
-        if (type===PersonnageType.warrior){
-            let warrior=new Warrior(cible.getSide(), cible.getGrid(), cible.getCoordonnees());
-            if(cible.getNbVie()!==cible.getNbVieMax()){
-                warrior.setNbVie(cible.getNbVie());
-            }
-            warrior.setCoordonnees(cible.getCoordonnees());
-            warrior.setNumber(cible.getNumber());
-            cible=warrior;
-            return cible;
-        }
-        if (type===PersonnageType.healer){
-            let healer=new Healer(cible.getSide(), cible.getGrid(), cible.getCoordonnees());
-            if(cible.getNbVie()!==cible.getNbVieMax()){
-                healer.setNbVie(cible.getNbVie());
-            }
-            healer.setCoordonnees(cible.getCoordonnees());
-            healer.setNumber(cible.getNumber());
-            cible=healer;
-            return cible;
-        }
-        if (type===PersonnageType.recruiter){
-            let recruiter=new Recruiter(cible.getSide(), cible.getGrid(), cible.getCoordonnees());
-            if(cible.getNbVie()!==cible.getNbVieMax()){
-                recruiter.setNbVie(cible.getNbVie());
-            }
-            recruiter.setCoordonnees(cible.getCoordonnees());
-            recruiter.setNumber(cible.getNumber());
-            cible=recruiter;
-            return cible;
-        }
-        return cible;
-        // this.useAction();
-        // cible.setType(type);
-        // return `Ce personnage est maintenant un ${cible.getType()}`
+    
+        let nouveauPersonnage: Personnage;
+        nouveauPersonnage = new Warrior(this.getSide(), cible.getGrid(), cible.getCoordonnees());
+
+    
+        // Transférez les données pertinentes de l'ancien personnage au nouveau (par exemple, les points de vie, etc.)
+        nouveauPersonnage.setNbVie(cible.getNbVie());
+        nouveauPersonnage.setNumber(cible.getNumber());
+        nouveauPersonnage.setCoordonnees(cible.getCoordonnees());
+
+        // Retirez l'ancien personnage de la liste des personnages actifs
+        cible.getGrid().removePersonnageList(cible);
+
+        // Ajoutez le nouveau personnage à la liste
+        cible.getGrid().addPersonnageList(nouveauPersonnage);
+
+        // Utilisez la méthode de la grille pour afficher le nouveau personnage sur la case
+        cible.getGrid().displayPersonnageOnCase(nouveauPersonnage, cible.getCoordonnees(), this.getImg());
+    
+        return nouveauPersonnage; // Renvoyez la nouvelle instance créée ou null si la formation n'a pas abouti
     }
 }

@@ -2,6 +2,9 @@ import { PersonnageAction } from "../enum/PersonnageAction";
 import { PersonnageSide } from "../enum/PersonnageSide";
 import { PersonnageType } from "../enum/PersonnageType";
 import { Grid } from "./Grid";
+import { Healer } from "./Healer";
+import { Recruiter } from "./Recruiter";
+import { Warrior } from "./Warrior";
 
 export abstract class Personnage{
 
@@ -187,27 +190,58 @@ export abstract class Personnage{
         return possibleCoordonnes;
     }
 
-    public move(newCoordonnees: [number, number]): void {
-        console.log("Déplacement en cours...", this.coordonnees, "vers", newCoordonnees);
+    public move(newCoordinates: [number, number]): void {
+        console.log("Déplacement en cours...", this.coordonnees, "vers", newCoordinates);
         console.log("Coordonnées possibles : ", this.getCoordonneesPossible());
-        console.log("Nouvelles coordonnées : ", newCoordonnees);
+        console.log("Nouvelles coordonnées : ", newCoordinates);
     
-        const possibleCoordonnes = this.getCoordonneesPossible();
-        
-        if (this.isCoordonneesInArray(newCoordonnees, possibleCoordonnes)) {
-            const oldCoordonnes = this.getCoordonnees(); // Enregistrer les anciennes coordonnées
-            this.grid.removePersonnageFromCase(oldCoordonnes);
+        const possibleCoordinates = this.getCoordonneesPossible();
     
-            // Utiliser requestAnimationFrame pour forcer la mise à jour de l'interface utilisateur
+        if (this.isCoordonneesInArray(newCoordinates, possibleCoordinates)) {
+            let occupant = this.grid.getOccupantAtCoordinates(newCoordinates);
+    
+            if (!occupant) {
+                // La case est vide, procédez au déplacement
+                const oldCoordinates = this.getCoordonnees();
+                this.grid.removePersonnageFromCase(oldCoordinates);
                 requestAnimationFrame(() => {
-                this.setCoordonnees(newCoordonnees);
-                this.setCoordonneesPossible(this.defineCoordonneesPossible(this.getCoordonnees()));
-                this.grid.displayPersonnageOnCase(this, this.coordonnees, this.img);
-                this.useAction();
-                this.grid.updateGridBackgroundColors(); // Mettre à jour la couleur de fond après le déplacement
-            });
+                    this.setCoordonnees(newCoordinates);
+                    this.setCoordonneesPossible(this.defineCoordonneesPossible(this.getCoordonnees()));
+                    this.grid.displayPersonnageOnCase(this, this.coordonnees, this.img);
+                    this.useAction();
+                    this.grid.updateGridBackgroundColors();
+                });
+            }else if(this.getType()===PersonnageType.warrior){
+                let warriorUnknown = this as unknown ;
+                let warriorThis = warriorUnknown as Warrior;
+                if(this.getSide()!==occupant.getSide()){
+                    warriorThis.attack(occupant);
+                } else{
+                    alert( "On ne tape pas les copains")
+                }
+            }else if (this.getType()===PersonnageType.healer){
+                let healerUnknown = this as unknown ;
+                let healerThis = healerUnknown as Healer;
+                if(this.getSide()!==occupant.getSide()){
+                    alert( "On ne soigne pas l'ennemis")
+                } else{
+                    healerThis.heal(occupant);
+                }
+            }else if(this.getType()===PersonnageType.recruiter){
+                let recruiterUnknown = this as unknown ;
+                let recruiterThis = recruiterUnknown as Recruiter;
+                if(occupant.getSide()===PersonnageSide.neutre){
+                    recruiterThis.recruite(occupant);
+                }else if(occupant.getSide()!==this.getSide()){
+                    alert("Il a déjà un camps, il ne viendra pas")
+                }else if(occupant.getSide()===this.getSide()){
+                    occupant = recruiterThis.train(occupant, PersonnageType.warrior);
+                }
+            }
         }
     }
+
+
     
     private isCoordonneesInArray(target: [number, number], coordonnesArray: [number, number][]): boolean {
         for (const coordonnees of coordonnesArray) {
