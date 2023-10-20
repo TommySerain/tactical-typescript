@@ -108,7 +108,8 @@ export class Grid{
             const perso = document.createElement('img');
             perso.classList.add(personnage.getType());
             perso.setAttribute('src', img);
-            perso.style.height = "20px";
+            perso.style.height = this.caseSize;
+            perso.style.pointerEvents = "none"
             perso.addEventListener('click', () => {
                 // Vérifiez si un personnage est déjà sélectionné
                 const game = personnage.getGrid().getGame();
