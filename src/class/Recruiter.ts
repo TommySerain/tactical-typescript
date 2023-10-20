@@ -44,22 +44,12 @@ export class Recruiter extends Personnage{
     
         let nouveauPersonnage: Personnage;
         nouveauPersonnage = new Warrior(this.getSide(), cible.getGrid(), cible.getCoordonnees());
-
-    
-        // Transférez les données pertinentes de l'ancien personnage au nouveau (par exemple, les points de vie, etc.)
         nouveauPersonnage.setNbVie(cible.getNbVie());
         nouveauPersonnage.setNumber(cible.getNumber());
         nouveauPersonnage.setCoordonnees(cible.getCoordonnees());
-
-        // Retirez l'ancien personnage de la liste des personnages actifs
         cible.getGrid().removePersonnageList(cible);
-
-        // Ajoutez le nouveau personnage à la liste
         cible.getGrid().addPersonnageList(nouveauPersonnage);
-
-        // Utilisez la méthode de la grille pour afficher le nouveau personnage sur la case
         cible.getGrid().displayPersonnageOnCase(nouveauPersonnage, cible.getCoordonnees(), this.getImg());
-    
-        return nouveauPersonnage; // Renvoyez la nouvelle instance créée ou null si la formation n'a pas abouti
+        return nouveauPersonnage;
     }
 }
